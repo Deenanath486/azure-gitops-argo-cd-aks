@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: retail-platform
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "Enterprise Retail Platform microservices deployment project on AKS"
+  
+  # Allow manifests to originate ONLY from trusted repositories
+  sourceRepos:
+    - "https://github.com/Deenanath486/azure-gitops-argo-cd-aks.git"
+
+  # Only allow deployments to AKS clusters and specific namespaces
+  destinations:
+    - namespace: "dev-orders"
+      server: "https://kubernetes.default.svc"
+    - namespace: "staging-orders"
+      server: "https://kubernetes.default.svc"
+    - namespace: "prod-orders"
+      server: "https://kubernetes.default.svc"
+
+  # Whitelist permitted cluster-scoped and namespace-scoped resources
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+
+  namespaceResourceWhitelist:
+    - group: "apps"
+      kind: Deployment
+    - group: ""
+      kind: Service
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: ServiceAccount
+    - group: "networking.k8s.io"
+      kind: Ingress
+    - group: "networking.k8s.io"
+      kind: NetworkPolicy
+    - group: "autoscaling"
+      kind: HorizontalPodAutoscaler
+
+  # Granular RBAC roles
+  roles:
+    - name: read-only
+      description: "Read-only access for developers"
+      policies:
+        - p, proj:retail-platform:read-only, applications, get, retail-platform/*, allow
+      groups:
+        - "azure-ad-devs-group"
+
+    - name: lead-engineer
+      description: "Deployment sync rights for Tech Leads"
+      policies:
+        - p, proj:retail-platform:lead-engineer, applications, sync, retail-platform/*, allow
+        - p, proj:retail-platform:lead-engineer, applications, get, retail-platform/*, allow
+      groups:
+        - "azure-ad-lead-engineers"

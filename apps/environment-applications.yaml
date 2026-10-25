@@ -1,0 +1,106 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-orders-api
+  namespace: argocd
+  labels:
+    environment: dev
+    team: order-processing
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: retail-platform
+  source:
+    repoURL: "https://github.com/Deenanath486/azure-gitops-argo-cd-aks.git"
+    targetRevision: main
+    path: environments/dev
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: dev-orders
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: staging-orders-api
+  namespace: argocd
+  labels:
+    environment: staging
+    team: order-processing
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: retail-platform
+  source:
+    repoURL: "https://github.com/Deenanath486/azure-gitops-argo-cd-aks.git"
+    targetRevision: main
+    path: environments/staging
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: staging-orders
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prod-orders-api
+  namespace: argocd
+  labels:
+    environment: prod
+    team: order-processing
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: retail-platform
+  source:
+    repoURL: "https://github.com/Deenanath486/azure-gitops-argo-cd-aks.git"
+    targetRevision: main
+    path: environments/prod
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: prod-orders
+  syncPolicy:
+    automated:
+      prune: false  # In prod, require review before deleting pruned resources
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  # Production Sync Windows - only allow auto sync outside business peak hours
+  syncWindows:
+    - kind: allow
+      schedule: "0 22 * * *"
+      duration: 4h
+      applications:
+        - "prod-orders-api"
+      timeZone: "Asia/Kolkata"

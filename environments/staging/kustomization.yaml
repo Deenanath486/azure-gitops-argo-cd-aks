@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: staging-orders
+
+resources:
+  - ../../base
+
+namePrefix: staging-
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      name: order-processing-api
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: staging.orders.deenanathdevops.com
+    target:
+      kind: Ingress
+      name: order-processing-api
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - LOG_LEVEL=Information
+      - CACHE_TTL_SECONDS=180

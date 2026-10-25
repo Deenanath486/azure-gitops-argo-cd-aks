@@ -1,0 +1,43 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: prod-orders
+
+resources:
+  - ../../base
+
+namePrefix: prod-
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 4
+    target:
+      kind: Deployment
+      name: order-processing-api
+  - patch: |-
+      - op: replace
+        path: /spec/minReplicas
+        value: 4
+      - op: replace
+        path: /spec/maxReplicas
+        value: 20
+    target:
+      kind: HorizontalPodAutoscaler
+      name: order-processing-api
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: orders.deenanathdevops.com
+    target:
+      kind: Ingress
+      name: order-processing-api
+
+configMapGenerator:
+  - name: app-config
+    behavior: merge
+    literals:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - LOG_LEVEL=Warning
+      - CACHE_TTL_SECONDS=600

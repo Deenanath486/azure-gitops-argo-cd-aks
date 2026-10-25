@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: order-processing-sa
+  labels:
+    app.kubernetes.io/name: order-processing-api
+  annotations:
+    azure.workload.identity/client-id: "00000000-0000-0000-0000-000000000000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app.kubernetes.io/name: order-processing-api
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  LOG_LEVEL: "Information"
+  CACHE_TTL_SECONDS: "300"

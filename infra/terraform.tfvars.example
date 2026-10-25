@@ -1,0 +1,16 @@
+resource_group_name = "rg-gitops-aks-prod"
+location            = "East US"
+environment         = "prod"
+cluster_name        = "aks-gitops-enterprise-01"
+kubernetes_version  = "1.29"
+
+system_node_count   = 2
+system_node_size    = "Standard_D2s_v5"
+workload_node_size  = "Standard_D4s_v5"
+
+tags = {
+  Environment = "Production"
+  ManagedBy   = "Terraform"
+  Project     = "GitOps-ArgoCD"
+  Owner       = "Deenanath Yadav"
+}

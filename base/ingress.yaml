@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: order-processing-api
+  labels:
+    app.kubernetes.io/name: order-processing-api
+  annotations:
+    kubernetes.io/ingress.class: "azure-application-gateway"
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/"
+spec:
+  rules:
+    - host: api.orders.deenanathdevops.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: order-processing-api
+                port:
+                  number: 80
