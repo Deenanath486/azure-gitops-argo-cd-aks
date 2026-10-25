@@ -49,4 +49,4 @@ jobs:
       - name: "Validate ArgoCD Application CRDs Syntax"
         run: |
           echo "Validating ArgoCD Custom Resource Definitions (YAML syntax)..."
-          python3 -c "import yaml, glob; [yaml.safe_load(open(f)) for f in glob.glob('apps/*.yaml') + glob.glob('bootstrap/*.yaml')]; print('All ArgoCD CRD YAML files are syntactically valid.')"
+          python3 -c "import yaml, glob; [list(yaml.safe_load_all(open(f))) for f in glob.glob('apps/*.yaml') + glob.glob('bootstrap/*.yaml')]; print('All ArgoCD CRD YAML files are syntactically valid.')"
